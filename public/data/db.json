@@ -1,1 +1,30 @@
 
+{
+  "admin": {
+    "username": "admin",
+    "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi."
+  },
+  "sites": [
+    {
+      "id": "youtube",
+      "name": "YouTube",
+      "url": "https://www.youtube.com",
+      "icon": "/uploads/default-youtube.png",
+      "iconUrl": "https://www.youtube.com/favicon.ico",
+      "cookies": [],
+      "access": "public",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "url": "https://github.com",
+      "icon": null,
+      "iconUrl": "https://github.com/favicon.ico",
+      "cookies": [],
+      "access": "public",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "visitors": []
+}
