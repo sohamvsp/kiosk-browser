@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Panel — Kiosk Browser</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #07070f;
+  --card: #0f0f1a;
+  --card2: #161626;
+  --border: #1e1e35;
+  --border2: #2a2a45;
+  --accent: #7c6fff;
+  --accent-glow: rgba(124,111,255,0.25);
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --text: #eeeef5;
+  --muted: #6b6b90;
+  --radius: 14px;
+  --font: 'Outfit', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin:0; padding:0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ─── LOGIN SCREEN ─── */
+#login-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+#login-screen.hidden { display: none; }
+
+.login-box {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 44px 40px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 0 60px rgba(124,111,255,0.1);
+}
+.login-logo {
+  text-align: center; margin-bottom: 32px;
+}
+.login-logo .icon {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--accent), #ff6b9d);
+  border-radius: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 26px; margin-bottom: 14px;
+}
+.login-logo h1 { font-size: 22px; font-weight: 800; }
+.login-logo p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: var(--muted); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.form-group input {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus { border-color: var(--accent); }
+
+.error-msg {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5;
+  padding: 10px 14px; border-radius: 8px;
+  font-size: 13px; margin-bottom: 16px; display: none;
+}
+.error-msg.show { display: block; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 20px;
+  border-radius: 10px; border: none;
+  font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.18s; text-decoration: none;
+}
+.btn-primary {
+  background: var(--accent); color: #fff; width: 100%;
+  padding: 13px;
+}
+.btn-primary:hover { background: #6b5fff; box-shadow: 0 4px 20px var(--accent-glow); }
+.btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border2); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+.btn-danger:hover { background: rgba(239,68,68,0.25); }
+.btn-success { background: rgba(34,197,94,0.15); color: #86efac; border: 1px solid rgba(34,197,94,0.3); }
+.btn-success:hover { background: rgba(34,197,94,0.25); }
+.btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── MAIN LAYOUT ─── */
+#app { display: flex; min-height: 100vh; }
+#app.hidden { display: none; }
+
+/* Sidebar */
+#sidebar {
+  width: 230px; flex-shrink: 0;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header .brand {
+  display: flex; align-items: center; gap: 10px;
+}
+.brand-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent), #ff6b9d);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.brand-name { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
+.brand-badge {
+  font-size: 10px; background: var(--accent); color: #fff;
+  padding: 2px 7px; border-radius: 99px; font-weight: 600; margin-top: 3px;
+}
+
+.sidebar-nav { padding: 14px 10px; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  cursor: pointer; font-size: 14px; font-weight: 500;
+  color: var(--muted); transition: all 0.15s;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--card2); color: var(--text); }
+.nav-item.active { background: var(--accent-glow); color: var(--accent); }
+.nav-item .icon { font-size: 17px; width: 20px; text-align: center; }
+.nav-count {
+  margin-left: auto; background: var(--card2); color: var(--muted);
+  font-size: 11px; font-family: var(--mono);
+  padding: 2px 7px; border-radius: 99px;
+}
+.nav-item.active .nav-count { background: var(--accent-glow); color: var(--accent); }
+
+.sidebar-footer {
+  padding: 14px 10px;
+  border-top: 1px solid var(--border);
+}
+.user-info {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 9px;
+  background: var(--card2); margin-bottom: 8px;
+}
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #ff6b9d);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.user-name { font-size: 13px; font-weight: 600; }
+.user-role { font-size: 11px; color: var(--muted); }
+
+/* Main content */
+#main {
+  flex: 1; margin-left: 230px;
+  padding: 28px 32px;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+/* Sections */
+.section { display: none; }
+.section.active { display: block; }
+
+/* Page header */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 28px; gap: 16px; flex-wrap: wrap;
+}
+.page-title h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+.page-title p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+/* Stats cards */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+}
+.stat-card .stat-val { font-size: 32px; font-weight: 800; }
+.stat-card .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+.stat-accent { color: var(--accent); }
+.stat-green { color: var(--green); }
+
+/* Cards */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 20px;
+}
+.card-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.card-title { font-size: 15px; font-weight: 700; }
+.card-body { padding: 22px; }
+
+/* App/Visitor list items */
+.item-list { display: flex; flex-direction: column; gap: 10px; }
+
+.app-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 11px; transition: border-color 0.15s;
+}
+.app-item:hover { border-color: var(--border2); }
+
+.app-logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  object-fit: contain; background: var(--card);
+  flex-shrink: 0;
+}
+.app-logo-placeholder {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #ff6b9d);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.app-info { flex: 1; min-width: 0; }
+.app-name { font-size: 14px; font-weight: 700; }
+.app-url { font-size: 12px; color: var(--muted); font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-public { background: rgba(34,197,94,0.15); color: #86efac; }
+.badge-selected { background: rgba(245,158,11,0.15); color: #fcd34d; }
+.badge-admin { background: rgba(239,68,68,0.15); color: #fca5a5; }
+
+.app-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* Form */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+.form-group select {
+  width: 100%;
+  background: var(--card2); border: 1px solid var(--border2);
+  border-radius: 10px; color: var(--text);
+  font-family: var(--font); font-size: 15px;
+  padding: 12px 14px; outline: none;
+  transition: border-color 0.2s; cursor: pointer;
+}
+.form-group select:focus { border-color: var(--accent); }
+.form-group textarea {
+  width: 100%; resize: vertical; min-height: 90px;
+  background: var(--card2); border: 1px solid var(--border2);
+  border-radius: 10px; color: var(--text);
+  font-family: var(--mono); font-size: 12px;
+  padding: 12px 14px; outline: none; transition: border-color 0.2s;
+}
+.form-group textarea:focus { border-color: var(--accent); }
+
+.logo-upload-area {
+  border: 2px dashed var(--border2); border-radius: 11px;
+  padding: 22px; text-align: center; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.logo-upload-area:hover { border-color: var(--accent); background: var(--accent-glow); }
+.logo-upload-area input { display: none; }
+.logo-preview {
+  width: 56px; height: 56px; border-radius: 12px;
+  object-fit: contain; margin: 0 auto 10px; display: block;
+}
+.upload-hint { font-size: 13px; color: var(--muted); }
+.upload-hint span { color: var(--accent); }
+
+/* Visitor item */
+.visitor-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 11px;
+}
+.visitor-avatar {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.visitor-info { flex: 1; }
+.visitor-name { font-size: 14px; font-weight: 700; }
+.visitor-access { font-size: 12px; color: var(--muted); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  z-index: 500; display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--card); border: 1px solid var(--border2);
+  border-radius: 18px; width: 100%; max-width: 520px;
+  max-height: 90vh; overflow-y: auto;
+  transform: translateY(20px); transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  padding: 22px 24px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 17px; font-weight: 800; }
+.modal-close {
+  background: none; border: none; color: var(--muted);
+  font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+  transition: color 0.15s;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 22px 24px; }
+.modal-footer {
+  padding: 16px 24px 22px;
+  display: flex; justify-content: flex-end; gap: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* Toast */
+#toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--card); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 13px 18px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 9999; max-width: 300px;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast .t-icon { font-size: 18px; flex-shrink: 0; }
+
+/* Cookies helper */
+.cookie-table {
+  width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--mono);
+}
+.cookie-table th {
+  text-align: left; padding: 8px 10px;
+  background: var(--bg); color: var(--muted); font-weight: 600;
+}
+.cookie-table td { padding: 6px 10px; }
+.cookie-table tr + tr td { border-top: 1px solid var(--border); }
+.cookie-row input {
+  background: var(--card2); border: 1px solid var(--border2);
+  border-radius: 6px; color: var(--text); font-family: var(--mono);
+  font-size: 11px; padding: 5px 8px; width: 100%; outline: none;
+}
+.cookie-row input:focus { border-color: var(--accent); }
+
+/* Site checkboxes for visitor access */
+.site-checks { display: flex; flex-direction: column; gap: 8px; }
+.site-check-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--card2); border: 1px solid var(--border);
+  border-radius: 9px; cursor: pointer; transition: border-color 0.15s;
+}
+.site-check-item:hover { border-color: var(--accent); }
+.site-check-item input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.site-check-item label { font-size: 14px; cursor: pointer; flex: 1; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  #sidebar { width: 60px; }
+  .sidebar-header .brand-name, .sidebar-header .brand-badge,
+  .nav-item > span, .nav-count, .user-name, .user-role { display: none; }
+  #main { margin-left: 60px; padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── LOGIN ─── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon">🖥️</div>
+      <h1>Admin Panel</h1>
+      <p>Sign in to manage your Kiosk Browser</p>
+    </div>
+    <div class="error-msg" id="login-error"></div>
+    <div class="form-group"><label>Username</label><input id="login-user" type="text" placeholder="admin" autocomplete="username"/></div>
+    <div class="form-group"><label>Password</label><input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ─── APP ─── -->
+<div id="app" class="hidden">
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-icon">🖥️</div>
+        <div>
+          <div class="brand-name">KioskBrowser</div>
+          <div class="brand-badge">ADMIN</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showSection('dashboard')" data-section="dashboard">
+        <span class="icon">📊</span><span>Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="showSection('apps')" data-section="apps">
+        <span class="icon">🌐</span><span>Apps</span>
+        <span class="nav-count" id="apps-count">0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('visitors')" data-section="visitors">
+        <span class="icon">👥</span><span>Visitors</span>
+        <span class="nav-count" id="visitors-count">0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('settings')" data-section="settings">
+        <span class="icon">⚙️</span><span>Settings</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">A</div>
+        <div><div class="user-name">Admin</div><div class="user-role">Administrator</div></div>
+      </div>
+      <div class="nav-item" onclick="doLogout()">
+        <span class="icon">🚪</span><span>Logout</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main id="main">
+
+    <!-- ── DASHBOARD ── -->
+    <section class="section active" id="section-dashboard">
+      <div class="page-header">
+        <div class="page-title"><h2>Dashboard</h2><p>Overview of your Kiosk Browser</p></div>
+        <a href="/" target="_blank" class="btn btn-secondary">🌐 Open Kiosk</a>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val stat-accent" id="dash-apps">0</div><div class="stat-label">Apps Configured</div></div>
+        <div class="stat-card"><div class="stat-val stat-green" id="dash-visitors">0</div><div class="stat-label">Visitors</div></div>
+        <div class="stat-card"><div class="stat-val" id="dash-public">0</div><div class="stat-label">Public Apps</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--yellow)" id="dash-protected">0</div><div class="stat-label">Protected Apps</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Quick Actions</span></div>
+        <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="openAddAppModal()">➕ Add New App</button>
+          <button class="btn btn-secondary" onclick="showSection('visitors');openAddVisitorModal()">👤 Add Visitor</button>
+          <a href="/" target="_blank" class="btn btn-secondary">🌐 View Kiosk</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent Apps</span></div>
+        <div class="card-body">
+          <div class="item-list" id="dash-apps-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── APPS ── -->
+    <section class="section" id="section-apps">
+      <div class="page-header">
+        <div class="page-title"><h2>Apps</h2><p>Manage websites shown in the kiosk</p></div>
+        <button class="btn btn-primary" onclick="openAddAppModal()">➕ Add App</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">All Apps</span></div>
+        <div class="card-body">
+          <div class="item-list" id="apps-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── VISITORS ── -->
+    <section class="section" id="section-visitors">
+      <div class="page-header">
+        <div class="page-title"><h2>Visitors</h2><p>Manage who can access the kiosk</p></div>
+        <button class="btn btn-primary" onclick="openAddVisitorModal()">➕ Add Visitor</button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Visitor Accounts</span>
+          <span style="font-size:12px;color:var(--muted)">Share the kiosk URL + their credentials</span>
+        </div>
+        <div class="card-body">
+          <div class="item-list" id="visitors-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SETTINGS ── -->
+    <section class="section" id="section-settings">
+      <div class="page-header">
+        <div class="page-title"><h2>Settings</h2><p>Admin account settings</p></div>
+      </div>
+      <div class="card" style="max-width:480px;">
+        <div class="card-header"><span class="card-title">Change Admin Password</span></div>
+        <div class="card-body">
+          <div class="form-group"><label>Current Password</label><input id="cur-pw" type="password" placeholder="Current password"/></div>
+          <div class="form-group"><label>New Password</label><input id="new-pw" type="password" placeholder="New password"/></div>
+          <div class="form-group"><label>Confirm New Password</label><input id="confirm-pw" type="password" placeholder="Confirm new password"/></div>
+          <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ─── ADD/EDIT APP MODAL ─── -->
+<div class="modal-overlay" id="app-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="app-modal-title">Add New App</span>
+      <button class="modal-close" onclick="closeModal('app-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="app-edit-id"/>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>App Logo</label>
+        <div class="logo-upload-area" onclick="document.getElementById('logo-file').click()">
+          <input type="file" id="logo-file" accept="image/*" onchange="previewLogo(this)"/>
+          <img id="logo-preview-img" class="logo-preview" style="display:none"/>
+          <div id="logo-upload-hint" class="upload-hint">
+            <div style="font-size:28px;margin-bottom:6px;">📁</div>
+            Click to upload logo <span>(PNG, JPG, SVG)</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <div class="form-group"><label>Or use icon URL</label><input id="app-icon-url" type="text" placeholder="https://example.com/favicon.ico"/></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>App Name *</label><input id="app-name" type="text" placeholder="YouTube"/></div>
+        <div class="form-group"><label>Website URL *</label><input id="app-url" type="text" placeholder="https://youtube.com"/></div>
+      </div>
+      <div class="form-group">
+        <label>Access Level</label>
+        <select id="app-access">
+          <option value="public">🌍 Public — Anyone who logs in can see this</option>
+          <option value="selected">🔐 Selected Visitors Only</option>
+          <option value="admin">👑 Admin Only</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Login Cookies (optional)</label>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+          Paste cookies from Chrome DevTools → Application → Cookies to keep this site logged in.
+        </div>
+        <div id="cookies-editor">
+          <table class="cookie-table">
+            <thead><tr><th>Cookie Name</th><th>Value</th><th>Domain</th><th></th></tr></thead>
+            <tbody id="cookies-tbody"></tbody>
+          </table>
+          <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="addCookieRow()">+ Add Cookie</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('app-modal')">Cancel</button>
+      <button class="btn btn-primary" id="app-save-btn" onclick="saveApp()">Save App</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── ADD/EDIT VISITOR MODAL ─── -->
+<div class="modal-overlay" id="visitor-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="visitor-modal-title">Add Visitor</span>
+      <button class="modal-close" onclick="closeModal('visitor-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="visitor-edit-id"/>
+      <div class="form-row">
+        <div class="form-group"><label>Username *</label><input id="visitor-username" type="text" placeholder="john_doe"/></div>
+        <div class="form-group"><label>Password *</label><input id="visitor-password" type="text" placeholder="Set a password"/></div>
+      </div>
+      <div class="form-group">
+        <label>App Access</label>
+        <select id="visitor-access-type" onchange="toggleSiteSelect()">
+          <option value="all">🌍 All Public Apps</option>
+          <option value="selected">🔐 Only Selected Apps</option>
+        </select>
+      </div>
+      <div id="visitor-sites-select" style="display:none;">
+        <div class="form-group">
+          <label>Select Apps this visitor can access:</label>
+          <div class="site-checks" id="visitor-site-checks"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('visitor-modal')">Cancel</button>
+      <button class="btn btn-primary" id="visitor-save-btn" onclick="saveVisitor()">Save Visitor</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div id="toast"><span class="t-icon" id="toast-icon"></span><span id="toast-msg"></span></div>
+
+<script>
+let allSites = [];
+let allVisitors = [];
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+async function init() {
+  const me = await fetch('/api/auth/me').then(r => r.json());
+  if (!me.loggedIn || me.role !== 'admin') {
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('app').classList.add('hidden');
+    return;
+  }
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  loadData();
+}
+
+async function loadData() {
+  const [sites, visitors] = await Promise.all([
+    fetch('/api/admin/sites').then(r => r.json()),
+    fetch('/api/admin/visitors').then(r => r.json())
+  ]);
+  allSites = sites;
+  allVisitors = visitors;
+  renderAll();
+}
+
+function renderAll() {
+  renderDashboard();
+  renderApps();
+  renderVisitors();
+  document.getElementById('apps-count').textContent = allSites.length;
+  document.getElementById('visitors-count').textContent = allVisitors.length;
+}
+
+// ── AUTH ─────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  if (!u || !p) { err.textContent = 'Enter username and password'; err.classList.add('show'); return; }
+
+  const res = await fetch('/api/auth/admin-login', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ username: u, password: p })
+  }).then(r => r.json());
+
+  if (!res.ok) { err.textContent = res.error; err.classList.add('show'); return; }
+  err.classList.remove('show');
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  loadData();
+}
+
+async function doLogout() {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  location.reload();
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`section-${name}`)?.classList.add('active');
+  document.querySelector(`[data-section="${name}"]`)?.classList.add('active');
+}
+
+// ── RENDER DASHBOARD ──────────────────────────────────────────────────────
+function renderDashboard() {
+  document.getElementById('dash-apps').textContent = allSites.length;
+  document.getElementById('dash-visitors').textContent = allVisitors.length;
+  document.getElementById('dash-public').textContent = allSites.filter(s => s.access === 'public').length;
+  document.getElementById('dash-protected').textContent = allSites.filter(s => s.access !== 'public').length;
+
+  const list = document.getElementById('dash-apps-list');
+  list.innerHTML = allSites.slice(0, 5).map(site => appItemHTML(site)).join('') || '<p style="color:var(--muted);font-size:14px;">No apps yet. <a href="#" onclick="openAddAppModal();return false;" style="color:var(--accent);">Add one →</a></p>';
+}
+
+// ── RENDER APPS ───────────────────────────────────────────────────────────
+function renderApps() {
+  const list = document.getElementById('apps-list');
+  list.innerHTML = allSites.map(site => appItemHTML(site)).join('') ||
+    '<p style="color:var(--muted);font-size:14px;">No apps yet. Click "Add App" to get started.</p>';
+}
+
+function appItemHTML(site) {
+  const logoSrc = site.icon || site.iconUrl;
+  const logoHTML = logoSrc
+    ? `<img class="app-logo" src="${logoSrc}" onerror="this.style.display='none'"/>`
+    : `<div class="app-logo-placeholder">${site.name[0]}</div>`;
+  const badgeClass = site.access === 'public' ? 'badge-public' : site.access === 'admin' ? 'badge-admin' : 'badge-selected';
+  const badgeLabel = site.access === 'public' ? '🌍 Public' : site.access === 'admin' ? '👑 Admin' : '🔐 Selected';
+  return `
+    <div class="app-item">
+      ${logoHTML}
+      <div class="app-info">
+        <div class="app-name">${site.name}</div>
+        <div class="app-url">${site.url}</div>
+      </div>
+      <span class="badge ${badgeClass}">${badgeLabel}</span>
+      <div class="app-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openEditAppModal('${site.id}')">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteApp('${site.id}','${site.name}')">🗑️</button>
+      </div>
+    </div>`;
+}
+
+// ── RENDER VISITORS ───────────────────────────────────────────────────────
+function renderVisitors() {
+  const list = document.getElementById('visitors-list');
+  list.innerHTML = allVisitors.map(v => {
+    const access = v.allowedSites === 'all' ? 'All public apps' : `${Array.isArray(v.allowedSites) ? v.allowedSites.length : 0} selected apps`;
+    return `
+      <div class="visitor-item">
+        <div class="visitor-avatar">${v.username[0].toUpperCase()}</div>
+        <div class="visitor-info">
+          <div class="visitor-name">${v.username}</div>
+          <div class="visitor-access">Access: ${access}</div>
+        </div>
+        <div class="app-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openEditVisitorModal('${v.id}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteVisitor('${v.id}','${v.username}')">🗑️</button>
+        </div>
+      </div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:14px;">No visitors yet. Click "Add Visitor" to create accounts.</p>';
+}
+
+// ── APP MODAL ─────────────────────────────────────────────────────────────
+function openAddAppModal() {
+  document.getElementById('app-edit-id').value = '';
+  document.getElementById('app-modal-title').textContent = 'Add New App';
+  document.getElementById('app-name').value = '';
+  document.getElementById('app-url').value = '';
+  document.getElementById('app-icon-url').value = '';
+  document.getElementById('app-access').value = 'public';
+  document.getElementById('logo-file').value = '';
+  document.getElementById('logo-preview-img').style.display = 'none';
+  document.getElementById('logo-upload-hint').style.display = 'block';
+  document.getElementById('cookies-tbody').innerHTML = '';
+  openModal('app-modal');
+}
+
+function openEditAppModal(id) {
+  const site = allSites.find(s => s.id === id);
+  if (!site) return;
+  document.getElementById('app-edit-id').value = id;
+  document.getElementById('app-modal-title').textContent = 'Edit App';
+  document.getElementById('app-name').value = site.name;
+  document.getElementById('app-url').value = site.url;
+  document.getElementById('app-icon-url').value = site.iconUrl || '';
+  document.getElementById('app-access').value = site.access;
+
+  // Show existing logo
+  const logoSrc = site.icon || site.iconUrl;
+  if (logoSrc) {
+    document.getElementById('logo-preview-img').src = logoSrc;
+    document.getElementById('logo-preview-img').style.display = 'block';
+    document.getElementById('logo-upload-hint').style.display = 'none';
+  }
+
+  // Populate cookies
+  document.getElementById('cookies-tbody').innerHTML = '';
+  (site.cookies || []).forEach(c => addCookieRow(c.name, c.value, c.domain));
+
+  openModal('app-modal');
+}
+
+async function saveApp() {
+  const id = document.getElementById('app-edit-id').value;
+  const name = document.getElementById('app-name').value.trim();
+  const url = document.getElementById('app-url').value.trim();
+  if (!name || !url) { toast('Name and URL are required', '⚠️'); return; }
+
+  // Collect cookies
+  const cookies = [];
+  document.querySelectorAll('.cookie-row').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    if (inputs[0].value && inputs[1].value) {
+      cookies.push({ name: inputs[0].value, value: inputs[1].value, domain: inputs[2].value });
+    }
+  });
+
+  const fd = new FormData();
+  fd.append('name', name);
+  fd.append('url', url);
+  fd.append('access', document.getElementById('app-access').value);
+  fd.append('iconUrl', document.getElementById('app-icon-url').value);
+  fd.append('cookies', JSON.stringify(cookies));
+  const logoFile = document.getElementById('logo-file').files[0];
+  if (logoFile) fd.append('logo', logoFile);
+
+  const endpoint = id ? `/api/admin/sites/${id}` : '/api/admin/sites';
+  const method = id ? 'PUT' : 'POST';
+
+  const res = await fetch(endpoint, { method, body: fd }).then(r => r.json());
+  if (!res.ok) { toast(res.error || 'Error saving', '❌'); return; }
+
+  closeModal('app-modal');
+  toast(id ? 'App updated!' : 'App added!', '✅');
+  loadData();
+}
+
+async function deleteApp(id, name) {
+  if (!confirm(`Delete "${name}"?`)) return;
+  const res = await fetch(`/api/admin/sites/${id}`, { method: 'DELETE' }).then(r => r.json());
+  if (res.ok) { toast('App deleted', '🗑️'); loadData(); }
+}
+
+// Cookie editor rows
+function addCookieRow(name='', value='', domain='') {
+  const tr = document.createElement('tr');
+  tr.className = 'cookie-row';
+  tr.innerHTML = `
+    <td><input type="text" value="${name}" placeholder="session_id"/></td>
+    <td><input type="text" value="${value}" placeholder="abc123xyz"/></td>
+    <td><input type="text" value="${domain}" placeholder=".example.com"/></td>
+    <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">✕</button></td>`;
+  document.getElementById('cookies-tbody').appendChild(tr);
+}
+
+function previewLogo(input) {
+  if (!input.files[0]) return;
+  const url = URL.createObjectURL(input.files[0]);
+  document.getElementById('logo-preview-img').src = url;
+  document.getElementById('logo-preview-img').style.display = 'block';
+  document.getElementById('logo-upload-hint').style.display = 'none';
+}
+
+// ── VISITOR MODAL ────────────────────────────────────────────────────────
+function openAddVisitorModal() {
+  document.getElementById('visitor-edit-id').value = '';
+  document.getElementById('visitor-modal-title').textContent = 'Add Visitor';
+  document.getElementById('visitor-username').value = '';
+  document.getElementById('visitor-password').value = '';
+  document.getElementById('visitor-access-type').value = 'all';
+  document.getElementById('visitor-sites-select').style.display = 'none';
+  renderSiteCheckboxes([]);
+  openModal('visitor-modal');
+}
+
+function openEditVisitorModal(id) {
+  const v = allVisitors.find(x => x.id === id);
+  if (!v) return;
+  document.getElementById('visitor-edit-id').value = id;
+  document.getElementById('visitor-modal-title').textContent = 'Edit Visitor';
+  document.getElementById('visitor-username').value = v.username;
+  document.getElementById('visitor-password').value = '';
+
+  const isSelected = Array.isArray(v.allowedSites);
+  document.getElementById('visitor-access-type').value = isSelected ? 'selected' : 'all';
+  if (isSelected) {
+    document.getElementById('visitor-sites-select').style.display = 'block';
+    renderSiteCheckboxes(v.allowedSites);
+  }
+  openModal('visitor-modal');
+}
+
+function toggleSiteSelect() {
+  const val = document.getElementById('visitor-access-type').value;
+  const wrap = document.getElementById('visitor-sites-select');
+  wrap.style.display = val === 'selected' ? 'block' : 'none';
+  if (val === 'selected') renderSiteCheckboxes([]);
+}
+
+function renderSiteCheckboxes(selectedIds) {
+  const c = document.getElementById('visitor-site-checks');
+  c.innerHTML = allSites.map(s => `
+    <label class="site-check-item">
+      <input type="checkbox" value="${s.id}" ${selectedIds.includes(s.id) ? 'checked' : ''}/>
+      <span>${s.name}</span>
+      <span style="color:var(--muted);font-size:12px;margin-left:auto;">${s.url}</span>
+    </label>`).join('') || '<p style="color:var(--muted);font-size:13px;">No apps added yet.</p>';
+}
+
+async function saveVisitor() {
+  const id = document.getElementById('visitor-edit-id').value;
+  const username = document.getElementById('visitor-username').value.trim();
+  const password = document.getElementById('visitor-password').value;
+
+  if (!id && (!username || !password)) { toast('Username and password required', '⚠️'); return; }
+
+  const accessType = document.getElementById('visitor-access-type').value;
+  let allowedSites = 'all';
+  if (accessType === 'selected') {
+    allowedSites = [...document.querySelectorAll('#visitor-site-checks input:checked')].map(i => i.value);
+  }
+
+  const body = { username, allowedSites };
+  if (password) body.password = password;
+
+  const endpoint = id ? `/api/admin/visitors/${id}` : '/api/admin/visitors';
+  const method = id ? 'PUT' : 'POST';
+  const res = await fetch(endpoint, {
+    method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+  }).then(r => r.json());
+
+  if (!res.ok) { toast(res.error || 'Error', '❌'); return; }
+  closeModal('visitor-modal');
+  toast(id ? 'Visitor updated!' : 'Visitor added!', '✅');
+  loadData();
+}
+
+async function deleteVisitor(id, name) {
+  if (!confirm(`Delete visitor "${name}"?`)) return;
+  await fetch(`/api/admin/visitors/${id}`, { method: 'DELETE' });
+  toast('Visitor deleted', '🗑️');
+  loadData();
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────
+async function changePassword() {
+  const cur = document.getElementById('cur-pw').value;
+  const nw = document.getElementById('new-pw').value;
+  const con = document.getElementById('confirm-pw').value;
+  if (nw !== con) { toast('New passwords do not match', '⚠️'); return; }
+  if (nw.length < 6) { toast('Password must be at least 6 characters', '⚠️'); return; }
+  const res = await fetch('/api/admin/change-password', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ currentPassword: cur, newPassword: nw })
+  }).then(r => r.json());
+  if (res.ok) { toast('Password updated!', '✅'); document.getElementById('cur-pw').value = ''; document.getElementById('new-pw').value = ''; document.getElementById('confirm-pw').value = ''; }
+  else toast(res.error, '❌');
+}
+
+// ── MODALS ────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, icon = 'ℹ️') {
+  const el = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
