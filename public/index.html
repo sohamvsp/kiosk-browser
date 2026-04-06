@@ -6,339 +6,247 @@
 <title>Kiosk Browser</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg:#0a0a0f; --surface:#12121a; --surface2:#1a1a28;
-  --border:#2a2a3d; --accent:#6c63ff; --accent2:#ff6584;
-  --text:#e8e8f0; --muted:#6b6b88; --radius:12px;
-  --font:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
-}
+:root{--bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a28;--border:#2a2a3d;--accent:#6c63ff;--accent2:#ff6584;--text:#e8e8f0;--muted:#6b6b88;--radius:12px;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
 /* LOGIN */
-#login-screen{
-  position:fixed;inset:0;background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  z-index:1000;padding:20px;
-}
-#login-screen.hidden{display:none;}
-.login-box{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:20px;padding:40px 36px;
-  width:100%;max-width:380px;
-  box-shadow:0 0 60px rgba(108,99,255,0.12);
-}
-.login-header{text-align:center;margin-bottom:28px;}
-.login-header .logo-ring{
-  width:56px;height:56px;border-radius:16px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:inline-flex;align-items:center;justify-content:center;
-  font-size:26px;margin-bottom:14px;
-}
-.login-header h1{font-size:22px;font-weight:800;}
-.login-header p{font-size:13px;color:var(--muted);margin-top:4px;}
+#ls{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+#ls.hidden{display:none;}
+.lbox{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:38px 34px;width:100%;max-width:370px;box-shadow:0 0 60px rgba(108,99,255,.12);}
+.lh{text-align:center;margin-bottom:26px;}
+.li{width:54px;height:54px;border-radius:15px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;}
+.lbox h1{font-size:21px;font-weight:800;}.lbox .ls{font-size:13px;color:var(--muted);margin-top:4px;}
 
-.tab-switch{
-  display:flex;background:var(--surface2);border-radius:10px;
-  padding:3px;margin-bottom:22px;gap:3px;
-}
-.tab-sw-btn{
-  flex:1;padding:8px;border-radius:8px;
-  background:none;border:none;font-family:var(--font);
-  font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;
-  transition:all 0.15s;
-}
-.tab-sw-btn.active{background:var(--accent);color:#fff;}
+.tabs{display:flex;background:var(--surface2);border-radius:9px;padding:3px;margin-bottom:20px;gap:3px;}
+.tab-btn{flex:1;padding:8px;border-radius:7px;background:none;border:none;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .14s;}
+.tab-btn.on{background:var(--accent);color:#fff;}
 
-.fgroup{margin-bottom:14px;}
-.fgroup label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;letter-spacing:0.5px;text-transform:uppercase;}
-.fgroup input{
-  width:100%;background:var(--surface2);border:1px solid var(--border);
-  border-radius:9px;color:var(--text);font-family:var(--font);
-  font-size:14px;padding:11px 13px;outline:none;transition:border-color .2s;
-}
-.fgroup input:focus{border-color:var(--accent);}
-.err-msg{
-  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
-  color:#fca5a5;padding:9px 12px;border-radius:8px;
-  font-size:12px;margin-bottom:14px;display:none;
-}
-.err-msg.show{display:block;}
-.btn-login{
-  width:100%;padding:12px;background:var(--accent);border:none;
-  border-radius:10px;color:#fff;font-family:var(--font);font-size:15px;
-  font-weight:700;cursor:pointer;transition:all .18s;
-}
+.fg{margin-bottom:13px;}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;letter-spacing:.4px;text-transform:uppercase;}
+.fg input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;padding:11px 13px;outline:none;transition:border-color .2s;}
+.fg input:focus{border-color:var(--accent);}
+.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:13px;display:none;}
+.err.on{display:block;}
+.btn-login{width:100%;padding:12px;background:var(--accent);border:none;border-radius:9px;color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .17s;}
 .btn-login:hover{background:#5b54e8;box-shadow:0 4px 20px rgba(108,99,255,.3);}
 .btn-login:active{transform:scale(.97);}
 
 /* TOP BAR */
-#top-bar{
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:0 14px;display:flex;align-items:center;gap:10px;
-  height:52px;flex-shrink:0;z-index:10;
-}
+#tb{background:var(--surface);border-bottom:1px solid var(--border);padding:0 13px;display:flex;align-items:center;gap:9px;height:50px;flex-shrink:0;z-index:10;}
 #logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;flex-shrink:0;}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--accent);}50%{opacity:.6;box-shadow:0 0 16px var(--accent);}}
-.nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;flex-shrink:0;}
-.nav-btn:hover{background:var(--border);color:var(--text);}
-#url-wrap{flex:1;display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:9px;height:34px;padding:0 10px;gap:7px;transition:border-color .2s;}
-#url-wrap:focus-within{border-color:var(--accent);}
-#url-input{background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:11px;width:100%;}
-#url-input::placeholder{color:var(--muted);}
-#go-btn{background:var(--accent);border:none;border-radius:7px;color:#fff;padding:5px 12px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;flex-shrink:0;}
-#go-btn:hover{background:#5b54e8;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.nb{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .14s;flex-shrink:0;}
+.nb:hover{background:var(--border);color:var(--text);}
+#uw{flex:1;display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;height:33px;padding:0 10px;gap:6px;}
+#uw:focus-within{border-color:var(--accent);}
+#ui{background:none;border:none;outline:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;width:100%;}
+#ui::placeholder{color:var(--muted);}
+#gb{background:var(--accent);border:none;border-radius:7px;color:#fff;padding:5px 11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+#gb:hover{background:#5b54e8;}
 
-/* TABS */
-#tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 10px;gap:3px;height:44px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
-#tabs-bar::-webkit-scrollbar{display:none;}
-.tab{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px 8px 0 0;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);background:transparent;border:1px solid transparent;border-bottom:none;transition:all .15s;white-space:nowrap;flex-shrink:0;position:relative;user-select:none;}
+/* TABS BAR */
+#tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 10px;gap:3px;height:42px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+#tabs::-webkit-scrollbar{display:none;}
+.tab{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:8px 8px 0 0;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);background:transparent;border:1px solid transparent;border-bottom:none;transition:all .14s;white-space:nowrap;flex-shrink:0;position:relative;user-select:none;}
 .tab:hover{color:var(--text);background:var(--surface2);}
-.tab.active{color:var(--text);background:var(--bg);border-color:var(--border);border-bottom:1px solid var(--bg);margin-bottom:-1px;}
-.tab.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:8px 8px 0 0;}
-.tab-favicon{width:14px;height:14px;border-radius:3px;object-fit:contain;}
-.tab-fp{width:14px;height:14px;border-radius:3px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700;}
-.tab-loader{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:none;}
-.tab.loading .tab-loader{display:block;}
-.tab.loading .tab-favicon,.tab.loading .tab-fp{display:none;}
+.tab.on{color:var(--text);background:var(--bg);border-color:var(--border);border-bottom:1px solid var(--bg);margin-bottom:-1px;}
+.tab.on::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:8px 8px 0 0;}
+.tl{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.tab.loading .tl{display:block;}
+.tab.loading .tf,.tab.loading .tp{display:none;}
 @keyframes spin{to{transform:rotate(360deg);}}
+.tf{width:14px;height:14px;border-radius:3px;object-fit:contain;}
+.tp{width:14px;height:14px;border-radius:3px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700;}
 
 /* FRAMES */
-#frames-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg);}
-.frame-pane{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .2s;}
-.frame-pane.active{opacity:1;pointer-events:all;}
-.frame-pane iframe{width:100%;height:100%;border:none;background:#fff;}
-.frame-loading{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:5;transition:opacity .3s;}
-.frame-loading.hidden{opacity:0;pointer-events:none;}
-.loader-ring{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-right-color:var(--accent2);border-radius:50%;animation:spin .9s linear infinite;}
-.frame-loading p{font-size:12px;color:var(--muted);font-family:var(--mono);}
+#fw{flex:1;position:relative;overflow:hidden;background:var(--bg);}
+.fp{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .18s;}
+.fp.on{opacity:1;pointer-events:all;}
+.fp iframe{width:100%;height:100%;border:none;background:#fff;}
+.fload{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:5;transition:opacity .25s;}
+.fload.hidden{opacity:0;pointer-events:none;}
+.ring{width:42px;height:42px;border:3px solid var(--border);border-top-color:var(--accent);border-right-color:var(--accent2);border-radius:50%;animation:spin .9s linear infinite;}
+.fload p{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
 
 /* WELCOME */
-#welcome{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:var(--bg);z-index:5;padding:20px;}
-#welcome.hidden{display:none;}
-.wt{font-size:clamp(24px,4vw,40px);font-weight:800;text-align:center;background:linear-gradient(135deg,var(--text) 0%,var(--accent) 60%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px;line-height:1.1;}
-.ws{color:var(--muted);font-size:14px;text-align:center;max-width:380px;line-height:1.6;}
-#site-grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:560px;}
-.site-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 22px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;transition:all .2s;min-width:110px;text-align:center;}
-.site-card:hover{border-color:var(--accent);background:var(--surface2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,99,255,.2);}
-.site-card img{width:34px;height:34px;border-radius:8px;object-fit:contain;}
-.site-card span{font-size:12px;font-weight:700;color:var(--text);}
+#wl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:var(--bg);z-index:5;padding:20px;}
+#wl.hidden{display:none;}
+.wt{font-size:clamp(22px,4vw,38px);font-weight:800;text-align:center;background:linear-gradient(135deg,var(--text) 0%,var(--accent) 55%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px;}
+.ws{color:var(--muted);font-size:13px;text-align:center;max-width:360px;line-height:1.6;}
+#sg{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;transition:all .18s;min-width:105px;text-align:center;}
+.sc:hover{border-color:var(--accent);background:var(--surface2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(108,99,255,.2);}
+.sc img{width:32px;height:32px;border-radius:8px;object-fit:contain;}
+.sc .sp{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;}
+.sc span{font-size:12px;font-weight:700;}
 
 /* STATUS */
-#status-bar{background:var(--surface);border-top:1px solid var(--border);padding:3px 14px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;}
-.sdot{width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0;}
-#status-text{flex:1;}
-.logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;font-family:var(--mono);transition:color .15s;}
-.logout-btn:hover{color:var(--accent2);}
+#sb{background:var(--surface);border-top:1px solid var(--border);padding:3px 13px;display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0;}
+.sd{width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0;}
+#st{flex:1;}
+.lo{background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;font-family:'JetBrains Mono',monospace;transition:color .14s;}
+.lo:hover{color:var(--accent2);}
 
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--surface);}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent);}
-@media(max-width:600px){#logo span{display:none;}.tab{padding:7px 8px;font-size:11px;}#go-btn{padding:5px 8px;}}
+@media(max-width:580px){#logo span{display:none;}.tab{padding:6px 8px;font-size:11px;}#gb{padding:5px 8px;}}
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-header">
-      <div class="logo-ring">🖥️</div>
-      <h1>Kiosk Browser</h1>
-      <p>Sign in to access your apps</p>
+<div id="ls">
+  <div class="lbox">
+    <div class="lh"><div class="li">🖥️</div><h1>Kiosk Browser</h1><p class="ls">Sign in to access your apps</p></div>
+    <div class="tabs">
+      <button class="tab-btn on" onclick="setMode('visitor',this)">Visitor</button>
+      <button class="tab-btn" onclick="setMode('admin',this)">Admin</button>
     </div>
-    <div class="tab-switch">
-      <button class="tab-sw-btn active" onclick="switchLoginTab('visitor',this)">Visitor Login</button>
-      <button class="tab-sw-btn" onclick="switchLoginTab('admin',this)">Admin</button>
-    </div>
-    <div class="err-msg" id="login-err"></div>
-    <div class="fgroup"><label>Username</label><input id="l-user" type="text" placeholder="your username" autocomplete="username"/></div>
-    <div class="fgroup"><label>Password</label><input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <div class="err" id="lerr"></div>
+    <div class="fg"><label>Username</label><input id="lu" type="text" placeholder="Enter username" autocomplete="username"/></div>
+    <div class="fg"><label>Password</label><input id="lp" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
     <button class="btn-login" onclick="doLogin()">Sign In →</button>
   </div>
 </div>
 
 <!-- BROWSER -->
-<div id="top-bar">
+<div id="tb">
   <div id="logo"><div class="dot"></div><span>KioskBrowser</span></div>
-  <button class="nav-btn" onclick="goBack()">←</button>
-  <button class="nav-btn" onclick="goForward()">→</button>
-  <button class="nav-btn" onclick="doReload()">↺</button>
-  <button class="nav-btn" onclick="goHome()">⌂</button>
-  <div id="url-wrap">
-    <span style="font-size:11px;">🔒</span>
-    <input id="url-input" type="text" placeholder="Enter URL or search…" spellcheck="false"/>
-  </div>
-  <button id="go-btn" onclick="navigateTo()">Go</button>
+  <button class="nb" onclick="goBack()" title="Back">←</button>
+  <button class="nb" onclick="goFwd()" title="Forward">→</button>
+  <button class="nb" onclick="reload()" title="Reload">↺</button>
+  <button class="nb" onclick="goHome()" title="Home">⌂</button>
+  <div id="uw"><span style="font-size:10px;">🔒</span><input id="ui" type="text" placeholder="Enter URL..." spellcheck="false"/></div>
+  <button id="gb" onclick="navigate()">Go</button>
 </div>
-<div id="tabs-bar"></div>
-<div id="frames-wrap">
-  <div id="welcome">
+<div id="tabs"></div>
+<div id="fw">
+  <div id="wl">
     <div class="wt">Your Apps</div>
-    <p class="ws">All pre-logged in and ready for you. Click any app to open it.</p>
-    <div id="site-grid"></div>
+    <p class="ws">Pre-logged in and ready. Click any app to open it instantly.</p>
+    <div id="sg"></div>
   </div>
 </div>
-<div id="status-bar">
-  <div class="sdot"></div>
-  <span id="status-text">Ready</span>
-  <button class="logout-btn" onclick="doLogout()">⏻ logout</button>
-</div>
+<div id="sb"><div class="sd"></div><span id="st">Ready</span><button class="lo" onclick="doLogout()">⏻ logout</button></div>
 
 <script>
-let sites = [];
-let activeTabId = null;
-let loginMode = 'visitor';
+let sites = [], activeId = null, loginMode = 'visitor';
 
-function switchLoginTab(mode, btn) {
-  loginMode = mode;
-  document.querySelectorAll('.tab-sw-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('l-user').placeholder = mode === 'admin' ? 'admin' : 'your username';
+function setMode(m, btn) {
+  loginMode = m;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('lu').placeholder = m === 'admin' ? 'admin' : 'Enter username';
 }
 
 async function doLogin() {
-  const u = document.getElementById('l-user').value.trim();
-  const p = document.getElementById('l-pass').value;
-  const err = document.getElementById('login-err');
-  if (!u || !p) { err.textContent = 'Enter your username and password'; err.classList.add('show'); return; }
-
-  const endpoint = loginMode === 'admin' ? '/api/auth/admin-login' : '/api/auth/visitor-login';
-  const res = await fetch(endpoint, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ username: u, password: p })
-  }).then(r => r.json());
-
-  if (!res.ok) { err.textContent = res.error; err.classList.add('show'); return; }
-  err.classList.remove('show');
-
+  const u = document.getElementById('lu').value.trim();
+  const p = document.getElementById('lp').value;
+  const err = document.getElementById('lerr');
+  if (!u || !p) { err.textContent = 'Enter username and password'; err.classList.add('on'); return; }
+  const ep = loginMode === 'admin' ? '/api/auth/admin-login' : '/api/auth/visitor-login';
+  const res = await post(ep, { username: u, password: p });
+  if (!res.ok) { err.textContent = res.error; err.classList.add('on'); return; }
+  err.classList.remove('on');
   if (loginMode === 'admin') { window.location.href = '/admin'; return; }
-
-  document.getElementById('login-screen').classList.add('hidden');
-  init();
+  document.getElementById('ls').classList.add('hidden');
+  await loadSites();
 }
 
-async function doLogout() {
-  await fetch('/api/auth/logout', { method:'POST' });
-  location.reload();
-}
+async function doLogout() { await post('/api/auth/logout'); location.reload(); }
 
-async function init() {
-  const me = await fetch('/api/auth/me').then(r => r.json());
-  if (!me.loggedIn) {
-    document.getElementById('login-screen').classList.remove('hidden');
-    return;
-  }
+async function loadSites() {
+  const me = await get('/api/auth/me');
+  if (!me.loggedIn) { document.getElementById('ls').classList.remove('hidden'); return; }
   if (me.role === 'admin') { window.location.href = '/admin'; return; }
-
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('status-text').textContent = `Welcome, ${me.username}`;
-
-  const res = await fetch('/api/sites').then(r => r.json());
+  document.getElementById('ls').classList.add('hidden');
+  document.getElementById('st').textContent = `Welcome, ${me.username}`;
+  const res = await get('/api/sites');
   sites = Array.isArray(res) ? res : [];
-  renderTabs();
-  renderWelcomeGrid();
+  renderTabs(); renderGrid();
 }
 
-function renderWelcomeGrid() {
-  const g = document.getElementById('site-grid');
-  g.innerHTML = sites.map(s => {
-    const logoSrc = s.icon || s.iconUrl;
-    return `<div class="site-card" onclick="activateTab('${s.id}')">
-      ${logoSrc ? `<img src="${logoSrc}" onerror="this.style.display='none'" alt="${s.name}"/>` : ''}
-      <span>${s.name}</span>
-    </div>`;
-  }).join('') || '<p style="color:var(--muted);font-size:14px;">No apps available yet.</p>';
+function renderGrid() {
+  document.getElementById('sg').innerHTML = sites.map(s => {
+    const logo = s.svgLogo ? `<img src="${s.svgLogo}" onerror="this.style.display='none'" alt=""/>` : `<div class="sp">${s.name[0]}</div>`;
+    return `<div class="sc" onclick="activateTab('${s.id}')">${logo}<span>${s.name}</span></div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:13px;">No apps available.</p>';
 }
 
 function renderTabs() {
-  const bar = document.getElementById('tabs-bar');
-  bar.innerHTML = sites.map(s => {
-    const logoSrc = s.icon || s.iconUrl;
-    return `<div class="tab" id="tab-${s.id}" onclick="activateTab('${s.id}')">
-      <div class="tab-loader"></div>
-      ${logoSrc ? `<img class="tab-favicon" src="${logoSrc}" onerror="this.style.display='none'" alt=""/>` : `<div class="tab-fp">${s.name[0]}</div>`}
-      <span>${s.name}</span>
-    </div>`;
+  document.getElementById('tabs').innerHTML = sites.map(s => {
+    const logo = s.svgLogo ? `<img class="tf" src="${s.svgLogo}" onerror="this.style.display='none'" alt=""/>` : `<div class="tp">${s.name[0]}</div>`;
+    return `<div class="tab" id="tab-${s.id}" onclick="activateTab('${s.id}')"><div class="tl"></div>${logo}<span>${s.name}</span></div>`;
   }).join('');
 }
 
 function activateTab(id) {
-  document.getElementById('welcome').classList.add('hidden');
-  if (activeTabId) {
-    document.getElementById(`tab-${activeTabId}`)?.classList.remove('active');
-    document.getElementById(`frame-${activeTabId}`)?.classList.remove('active');
+  document.getElementById('wl').classList.add('hidden');
+  if (activeId) {
+    document.getElementById(`tab-${activeId}`)?.classList.remove('on');
+    document.getElementById(`fp-${activeId}`)?.classList.remove('on');
   }
-  activeTabId = id;
-  const site = sites.find(s => s.id === id);
-  const tab = document.getElementById(`tab-${id}`);
-  tab.classList.add('active');
+  activeId = id;
+  const s = sites.find(x => x.id === id);
+  document.getElementById(`tab-${id}`)?.classList.add('on');
 
-  let pane = document.getElementById(`frame-${id}`);
+  let pane = document.getElementById(`fp-${id}`);
   if (!pane) {
     pane = document.createElement('div');
-    pane.className = 'frame-pane';
-    pane.id = `frame-${id}`;
-
-    const loader = document.createElement('div');
-    loader.className = 'frame-loading';
-    loader.innerHTML = `<div class="loader-ring"></div><p>Loading ${site.name}…</p>`;
-
+    pane.className = 'fp'; pane.id = `fp-${id}`;
+    const loader = Object.assign(document.createElement('div'), { className: 'fload', innerHTML: `<div class="ring"></div><p>Loading ${s.name}…</p>` });
     const iframe = document.createElement('iframe');
-    iframe.src = `/proxy?url=${encodeURIComponent(site.url)}`;
-    iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-forms allow-popups allow-modals');
-    iframe.title = site.name;
-
+    iframe.src = `/proxy?url=${encodeURIComponent(s.url)}`;
+    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-modals');
+    iframe.title = s.name;
+    const tab = document.getElementById(`tab-${id}`);
     tab.classList.add('loading');
-    iframe.onload = () => { loader.classList.add('hidden'); tab.classList.remove('loading'); setStatus(`${site.name}`); };
-
-    pane.appendChild(loader);
-    pane.appendChild(iframe);
-    document.getElementById('frames-wrap').appendChild(pane);
+    iframe.onload = () => { loader.classList.add('hidden'); tab.classList.remove('loading'); setStatus(s.name); };
+    pane.append(loader, iframe);
+    document.getElementById('fw').appendChild(pane);
   }
-  pane.classList.add('active');
-  document.getElementById('url-input').value = site.url;
+  pane.classList.add('on');
+  document.getElementById('ui').value = s.url;
 }
 
-function navigateTo() {
-  let url = document.getElementById('url-input').value.trim();
+function navigate() {
+  let url = document.getElementById('ui').value.trim();
   if (!url) return;
   if (!url.startsWith('http')) url = 'https://' + url;
-  if (!activeTabId && sites.length) activateTab(sites[0].id);
-  const pane = document.getElementById(`frame-${activeTabId}`);
-  if (pane) {
-    const iframe = pane.querySelector('iframe');
-    const loader = pane.querySelector('.frame-loading');
-    const tab = document.getElementById(`tab-${activeTabId}`);
-    if (iframe) {
-      loader?.classList.remove('hidden');
-      tab?.classList.add('loading');
-      iframe.onload = () => { loader?.classList.add('hidden'); tab?.classList.remove('loading'); setStatus(url); };
-      iframe.src = `/proxy?url=${encodeURIComponent(url)}`;
-    }
+  if (!activeId && sites.length) activateTab(sites[0].id);
+  const pane = document.getElementById(`fp-${activeId}`);
+  if (!pane) return;
+  const iframe = pane.querySelector('iframe');
+  const loader = pane.querySelector('.fload');
+  const tab = document.getElementById(`tab-${activeId}`);
+  if (iframe) {
+    loader?.classList.remove('hidden');
+    tab?.classList.add('loading');
+    iframe.onload = () => { loader?.classList.add('hidden'); tab?.classList.remove('loading'); setStatus(url); };
+    iframe.src = `/proxy?url=${encodeURIComponent(url)}`;
   }
 }
 
-function goBack() { try { getIframe()?.contentWindow.history.back(); } catch(e){} }
-function goForward() { try { getIframe()?.contentWindow.history.forward(); } catch(e){} }
-function doReload() { const i = getIframe(); if(i) i.src = i.src; }
+function goBack() { try { getIframe()?.contentWindow.history.back(); } catch {} }
+function goFwd() { try { getIframe()?.contentWindow.history.forward(); } catch {} }
+function reload() { const i = getIframe(); if(i) i.src = i.src; }
 function goHome() {
-  document.getElementById('welcome').classList.remove('hidden');
-  if (activeTabId) {
-    document.getElementById(`tab-${activeTabId}`)?.classList.remove('active');
-    document.getElementById(`frame-${activeTabId}`)?.classList.remove('active');
-    activeTabId = null;
-  }
+  document.getElementById('wl').classList.remove('hidden');
+  if (activeId) { document.getElementById(`tab-${activeId}`)?.classList.remove('on'); document.getElementById(`fp-${activeId}`)?.classList.remove('on'); activeId = null; }
 }
-function getIframe() { return activeTabId ? document.getElementById(`frame-${activeTabId}`)?.querySelector('iframe') : null; }
-function setStatus(msg) { document.getElementById('status-text').textContent = msg; }
+function getIframe() { return activeId ? document.getElementById(`fp-${activeId}`)?.querySelector('iframe') : null; }
+function setStatus(msg) { document.getElementById('st').textContent = msg; }
+async function get(url) { try { return await fetch(url).then(r => r.json()); } catch { return {}; } }
+async function post(url, body) { try { return await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : null }).then(r => r.json()); } catch { return { ok: false }; } }
 
-document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') navigateTo(); });
-document.getElementById('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('ui').addEventListener('keydown', e => { if(e.key==='Enter') navigate(); });
+document.getElementById('lp').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
-init();
+loadSites();
 </script>
 </body>
 </html>
